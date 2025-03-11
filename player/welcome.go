@@ -2,46 +2,38 @@ package player
 
 import (
 	"github.com/ManManavadaria/gotyper/utils"
-	"github.com/ManManavadaria/gotyper/widgets"
 
-	"github.com/navidys/tvxwidgets"
 	"github.com/rivo/tview"
 )
 
-func CreateWelcome(app *tview.Application, gauge *tvxwidgets.ActivityModeGauge) error {
+func (a *App) CreateWelcome() error {
 
 	const welcomeSign = `welcome...`
 
 	signWi := tview.NewTextView().SetText(welcomeSign)
 	menuWi := tview.NewList().
 		AddItem("Let's start", "", 0, func() {
-			CreateSinglePlayer(app, gauge)
+			a.CreateSinglePlayer()
 		}).
 		AddItem("exit", "exit the app", 0, func() {
-			app.Stop()
+			a.TviewApp.Stop()
 		})
 
 	signW, signH := utils.StringDimensions(welcomeSign)
 	menuW, menuH := 32, menuWi.GetItemCount()*2
-	welcomeLayout := tview.NewFlex().
+	a.Layouts["welcome"] = tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(tview.NewBox(), 0, 1, false).
 		AddItem(Center(signW, signH, signWi), 0, 1, false).
 		AddItem(Center(menuW, menuH, menuWi), 0, 1, true).
 		AddItem(tview.NewBox(), 0, 1, false)
 
-	widgets.CreateActivityProgressBar(gauge, app, "Initiating the application...")
+	a.CreateActivityProgressBar("Initiating the application...")
 
-	pages := tview.NewPages().
-		AddPage("root1", welcomeLayout, true, true).
-		AddPage("root2", gauge, true, false)
+	a.Pages = tview.NewPages().
+		AddPage("welcome", a.Layouts["welcome"], true, false).
+		AddPage("loader", a.Gauge, false, true)
 
-	app.SetRoot(pages, true)
+	a.TviewApp.SetRoot(a.Pages, true)
 	return nil
 }
-
-// func ExitApp(app *tview.Application) error {
-// 	fmt.Println("exitinf application=====")
-// 	app.Stop()
-// 	return nil
-// }

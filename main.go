@@ -4,32 +4,25 @@ import (
 	"log"
 
 	"github.com/ManManavadaria/gotyper/player"
-	"github.com/ManManavadaria/gotyper/widgets"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/navidys/tvxwidgets"
-	"github.com/rivo/tview"
 )
 
 func main() {
-	app := tview.NewApplication()
-	defer app.Stop()
+	App := player.NewApplication()
+	defer App.TviewApp.Stop()
 
-	gauge := tvxwidgets.NewActivityModeGauge()
-
-	widgets.CreateActivityProgressBar(gauge, app, "Initializing the applicatio...")
-
-	app.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
+	App.TviewApp.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
 		screen.Clear()
 		return false
 	})
 
-	if err := player.CreateWelcome(app, gauge); err != nil {
+	if err := App.CreateWelcome(); err != nil {
 		log.Fatal(err)
 	}
 
 	// // go func() {
-	if err := app.Run(); err != nil {
+	if err := App.TviewApp.Run(); err != nil {
 		log.Fatal(err)
 	}
 }

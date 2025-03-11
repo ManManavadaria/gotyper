@@ -7,11 +7,10 @@ import (
 	"github.com/ManManavadaria/gotyper/utils"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/navidys/tvxwidgets"
 	"github.com/rivo/tview"
 )
 
-func CreateSinglePlayer(app *tview.Application, gauge *tvxwidgets.ActivityModeGauge) error {
+func (a *App) CreateSinglePlayer() error {
 	text, err := GenerateText()
 	if err != nil {
 		return err
@@ -32,9 +31,9 @@ func CreateSinglePlayer(app *tview.Application, gauge *tvxwidgets.ActivityModeGa
 			SetDoneFunc(func(index int, label string) {
 				switch index {
 				case 0:
-					utils.Check(CreateSinglePlayer(app, gauge))
+					utils.Check(a.CreateSinglePlayer())
 				case 1:
-					utils.Check(CreateWelcome(app, gauge))
+					utils.Check(a.CreateWelcome())
 				}
 			}), false, false)
 
@@ -57,7 +56,7 @@ func CreateSinglePlayer(app *tview.Application, gauge *tvxwidgets.ActivityModeGa
 							ticker.Stop()
 							return
 						}
-						app.QueueUpdateDraw(func() {
+						a.TviewApp.QueueUpdateDraw(func() {
 							statsWis[0].SetText(fmt.Sprintf("wpm: %.0f", state.Wpm()))
 							statsWis[1].SetText(fmt.Sprintf("time: %.02fs", time.Since(state.StartTime).Seconds()))
 						})
@@ -74,7 +73,7 @@ func CreateSinglePlayer(app *tview.Application, gauge *tvxwidgets.ActivityModeGa
 			i := state.CurrWord
 			diff := paintDiff(state.Words[i], text)
 			go func(i int, diff string) {
-				app.QueueUpdateDraw(func() {
+				a.TviewApp.QueueUpdateDraw(func() {
 					textWis[i].SetText(diff)
 				})
 			}(i, diff)
@@ -112,7 +111,7 @@ func CreateSinglePlayer(app *tview.Application, gauge *tvxwidgets.ActivityModeGa
 	layout.AddItem(secondColumn, 0, 3, true)
 
 	pages.AddPage("game", layout, true, true).SendToBack("game")
-	app.SetRoot(pages, true)
+	a.TviewApp.SetRoot(pages, true)
 
 	// keybindings(app, CreateWelcome)
 	return nil
