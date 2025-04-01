@@ -1,22 +1,35 @@
 package player
 
 import (
+	"log"
+
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-// func keybindings(app *tview.Application, goBack func(app *tview.Application) error) {
-// 	if goBack != nil {
-// 		app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-// 			if event.Key() == tcell.KeyEsc {
-// 				app.QueueUpdateDraw(func() {
-// 					utils.Check(goBack(app))
-// 				})
-// 			}
+func keybindings(app *tview.Application, goBack func() error) {
+	if goBack != nil {
+		app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+			if event.Key() == tcell.KeyEsc {
+				log.Println("inside escape func")
+				app.QueueUpdateDraw(func() {
+					log.Println("inside QueueUpdateDraw - before goBack execution")
 
-// 			return event
-// 		})
-// 	}
-// }
+					err := goBack()
+					if err != nil {
+						log.Printf("goBack() error: %v\n", err)
+					} else {
+						log.Println("goBack() executed successfully")
+					}
+
+					log.Println("inside QueueUpdateDraw - after goBack execution")
+
+				})
+			}
+			return event
+		})
+	}
+}
 
 // Center returns a new primitive which shows the provided primitive in its
 // center, given the provided primitive's size.

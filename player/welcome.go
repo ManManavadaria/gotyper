@@ -1,6 +1,8 @@
 package player
 
 import (
+	"log"
+
 	"github.com/ManManavadaria/gotyper/utils"
 
 	"github.com/rivo/tview"
@@ -8,7 +10,16 @@ import (
 
 func (a *App) CreateWelcome() error {
 
-	const welcomeSign = `welcome...`
+	log.Println("Inside welcome func")
+
+	const welcomeSign = `
+                     _                                          
+		__ _  ___   | |_ _   _ _ __   ___ _ __  
+	   / _  |/ _ \  | __| | | | '_ \ / _ \ '__|
+	  | (_| | (_) | | |_| |_| | |_) |  __/ |  
+	   \__, |\___/   \__|\__, | .__/ \___|_|  
+	   |___/         	 |___/|_|              
+	`
 
 	signWi := tview.NewTextView().SetText(welcomeSign)
 	menuWi := tview.NewList().
