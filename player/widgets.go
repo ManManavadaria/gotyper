@@ -29,9 +29,9 @@ func (a *App) CreateActivityProgressBar(msg string) error {
 	a.Gauge.SetBorder(true)
 
 	update := func() {
-		ctx, cancle := context.WithTimeout(context.Background(), time.Second*1)
+		ctx, cancle := context.WithTimeout(context.Background(), time.Millisecond*400)
 		defer cancle()
-		tick := time.NewTicker(20 * time.Millisecond)
+		tick := time.NewTicker(10 * time.Millisecond)
 		for {
 			select {
 			case <-tick.C:

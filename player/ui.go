@@ -12,19 +12,27 @@ func keybindings(app *tview.Application, goBack func() error) {
 		app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyEsc {
 				log.Println("inside escape func")
-				app.QueueUpdateDraw(func() {
-					log.Println("inside QueueUpdateDraw - before goBack execution")
 
-					err := goBack()
-					if err != nil {
-						log.Printf("goBack() error: %v\n", err)
-					} else {
-						log.Println("goBack() executed successfully")
-					}
+				// Debug: Check if app is running
+				if app == nil {
+					log.Println("ERROR: app is nil, cannot execute QueueUpdateDraw")
+					return event
+				}
 
-					log.Println("inside QueueUpdateDraw - after goBack execution")
+				// Use goroutine to ensure it's not blocking
+				go func() {
+					app.QueueUpdateDraw(func() {
 
-				})
+						// UI Test: Replace UI to see if update is working
+						testBox := tview.NewBox().SetBorder(true).SetTitle("Escape Pressed")
+						app.SetRoot(testBox, true)
+
+						if goBack != nil {
+							goBack()
+							app.SetInputCapture(nil)
+						}
+					})
+				}()
 			}
 			return event
 		})

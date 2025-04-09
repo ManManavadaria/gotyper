@@ -2,6 +2,7 @@ package player
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ManManavadaria/gotyper/utils"
@@ -39,7 +40,8 @@ func (a *App) CreateSinglePlayer() error {
 
 	var textWis []*tview.TextView
 	for _, word := range state.Words {
-		textWis = append(textWis, tview.NewTextView().SetText(word).SetDynamicColors(true))
+		// textWis = append(textWis, tview.NewTextView().SetText(word).SetDynamicColors(true))
+		textWis = append(textWis, tview.NewTextView().SetText(toNarrowFullWidth(word)).SetWordWrap(true).SetDynamicColors(true))
 	}
 
 	currInput := ""
@@ -74,7 +76,7 @@ func (a *App) CreateSinglePlayer() error {
 			diff := paintDiff(state.Words[i], text)
 			go func(i int, diff string) {
 				a.TviewApp.QueueUpdateDraw(func() {
-					textWis[i].SetText(diff)
+					textWis[i].SetText(diff).SetWordWrap(false)
 				})
 			}(i, diff)
 
@@ -92,22 +94,23 @@ func (a *App) CreateSinglePlayer() error {
 		})
 
 	layout := tview.NewFlex()
-	// statsFrame := tview.NewFlex().SetDirection(tview.FlexRow)
-	// statsFrame.SetBorder(true).SetBorderPadding(1, 1, 1, 1).SetTitle("STATS")
-	// for _, statsWi := range statsWis {
-	// 	statsFrame.AddItem(statsWi, 1, 1, false)
-	// }
-	// layout.AddItem(statsFrame, 0, 1, false)
+	statsFrame := tview.NewFlex().SetDirection(tview.FlexRow)
+	statsFrame.SetBorder(true).SetBorderPadding(1, 1, 1, 1).SetTitle("STATS")
+	for _, statsWi := range statsWis {
+		statsFrame.AddItem(statsWi, 1, 1, false)
+	}
+	layout.AddItem(statsFrame, 0, 1, false)
 
-	secondColumn := tview.NewFlex().SetDirection(tview.FlexRow)
+	secondColumn := tview.NewFlex().SetDirection(tview.FlexColumn)
 	textsLayout := tview.NewFlex()
 	for _, textWi := range textWis {
-		textsLayout.AddItem(textWi, len(textWi.GetText(true)), 1, false)
+		textsLayout.AddItem(textWi.SetWrap(true), len(textWi.GetText(true)), 1, false)
 	}
 	textsLayout.SetBorder(true)
+
 	secondColumn.AddItem(textsLayout, 0, 3, false)
 	inputWi.SetBorder(true)
-	secondColumn.AddItem(inputWi, 0, 1, true)
+	secondColumn.AddItem(inputWi, 0, 0, true)
 	layout.AddItem(secondColumn, 0, 3, true)
 
 	pages.AddPage("game", layout, true, true).SendToBack("game")
@@ -118,9 +121,10 @@ func (a *App) CreateSinglePlayer() error {
 }
 
 // paintDiff returns an tview-painted string displaying the difference
-func paintDiff(toColor string, differ string) (colorText string) {
+func paintDiff(toColor string, differ string) string {
 	var h string
 	h = ":"
+	var colorText string
 
 	for i := range differ {
 		if i >= len(toColor) || differ[i] != toColor[i] {
@@ -129,13 +133,45 @@ func paintDiff(toColor string, differ string) (colorText string) {
 			colorText += "[" + h + "green]"
 		}
 
-		colorText += string(differ[i])
+		colorText += toNarrowFullWidth(string(differ[i]))
 	}
+
 	colorText += "[-:-:-]"
 
 	if len(differ) < len(toColor) {
-		colorText += toColor[len(differ):]
+		colorText += toNarrowFullWidth(toColor[len(differ):])
 	}
 
-	return
+	return colorText
 }
+
+func toFullWidth(text string) string {
+	var result strings.Builder
+	for _, r := range text {
+		if r >= 33 && r <= 126 { // ASCII printable characters
+			result.WriteRune(r + 0xFEE0) // Convert to full-width
+		} else {
+			result.WriteRune(r) // Keep non-ASCII characters unchanged
+		}
+	}
+	return result.String()
+}
+
+func toNarrowFullWidth(text string) string {
+	return text
+}
+
+// func toNarrowFullWidth(text string) string {
+// 	var result strings.Builder
+// 	text = strings.TrimSpace(text)
+// 	for _, r := range text {
+// 		if r >= 33 && r <= 126 { // Convert only ASCII printable characters
+// 			result.WriteRune(r + 0xFEE0) // Convert to full-width
+// 			result.WriteRune('\u200B')   // Insert zero-width space to reduce spacing
+// 		} else {
+// 			result.WriteRune(r) // Keep other characters unchanged
+// 		}
+// 	}
+// 	// log.Println("bigtext->", result.String(), "--->")
+// 	return result.String()
+// }

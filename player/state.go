@@ -30,6 +30,9 @@ func NewState(text string) *State {
 	return &State{
 		Words: words,
 	}
+	// return &State{
+	// 	Words: []string{text},
+	// }
 }
 
 // Start starts the mechanism
